@@ -3,6 +3,7 @@ import type { ProjectLayerConfig } from "../projects/types";
 import { registerVectorPopup } from "./vectorPopup";
 import { IonResource } from "cesium";
 import { applyModelClipping } from "./modelClipping";
+import { NeverTileDiscardPolicy } from "cesium";
 
 export type LoadedLayer = ImageryLayer | GeoJsonDataSource | Cesium3DTileset;
 
@@ -125,6 +126,9 @@ export async function loadLayer(layer: ProjectLayerConfig): Promise<LoadedLayer>
         rectangle,
         tileWidth,
         tileHeight,
+        // A discard policy makes Cesium fetch a blob, preserving HTTP status
+        // even when ImageBitmap is unavailable. Valid images are never discarded.
+        tileDiscardPolicy: new NeverTileDiscardPolicy(),
       });
       const imageryLayer = new ImageryLayer(provider, { rectangle: provider.rectangle, show: false });
       assertImageryLayerReady(imageryLayer);

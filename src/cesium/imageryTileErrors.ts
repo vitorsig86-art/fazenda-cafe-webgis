@@ -1,6 +1,27 @@
 import type { ImageryProvider, TileProviderError } from "cesium";
 import type { ProjectLayerConfig } from "../projects/types";
 
+function getHttpStatus(error: unknown): number | undefined {
+  const pending = [error];
+  const visited = new Set<object>();
+  while (pending.length > 0) {
+    const value = pending.shift();
+    if (typeof value !== "object" || value === null || visited.has(value)) continue;
+    visited.add(value);
+    for (const key of ["statusCode", "status"] as const) {
+      if (!(key in value)) continue;
+      const status = (value as Record<string, unknown>)[key];
+      const code = typeof status === "number" ? status
+        : typeof status === "string" && /^\d{3}$/.test(status) ? Number(status) : undefined;
+      if (code !== undefined && Number.isInteger(code) && code >= 100 && code <= 599) return code;
+    }
+    for (const key of ["error", "cause", "response"] as const) {
+      if (key in value) pending.push((value as Record<string, unknown>)[key]);
+    }
+  }
+  return undefined;
+}
+
 export function createImageryTileErrorHandler(
   layer: ProjectLayerConfig,
   onWarning: (message: string) => void,
@@ -40,10 +61,7 @@ export function createImageryTileErrorHandler(
       onWarning("Não foi possível carregar os tiles do OpenStreetMap. Verifique a conexão.");
       return;
     }
-    const cause: unknown = tileError.error;
-    const statusCode = typeof cause === "object" && cause !== null && "statusCode" in cause
-      ? cause.statusCode
-      : undefined;
+    const statusCode = getHttpStatus(tileError.error);
 
     // A confirmed missing *tile* is recoverable, regardless of layer ID or
     // allowMissingTiles. Provider-level/opaque errors must not enter this path.
