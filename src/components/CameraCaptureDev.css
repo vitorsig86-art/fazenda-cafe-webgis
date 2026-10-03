@@ -1,0 +1,11 @@
+.camera-capture-dev { position: absolute; z-index: 4; left: calc(var(--panel-width) + 16px); bottom: 64px; width: min(340px, calc(100vw - var(--panel-width) - 32px)); max-height: calc(100dvh - var(--header-height) - 96px); overflow: auto; padding: 12px; border: 1px solid #d5ddd5; border-radius: 10px; background: #fafbf7f2; color: #21372c; box-shadow: 0 4px 18px #0002; }
+.camera-capture-dev small { display: block; margin-bottom: 8px; }
+.camera-capture-dev-actions { display: flex; gap: 8px; }
+.camera-capture-dev button { flex: 1; min-height: 44px; padding: 6px 8px; border: 1px solid #c3cec3; border-radius: 6px; background: #edf2e7; color: inherit; cursor: pointer; }
+.camera-capture-dev button:disabled { opacity: .5; cursor: default; }
+.camera-capture-dev textarea { display: block; width: 100%; margin-top: 10px; padding: 8px; resize: none; border: 1px solid #d5ddd5; border-radius: 6px; background: #fff; color: inherit; font: 12px/1.5 monospace; }
+.camera-capture-dev p { margin: 8px 0 0; font-size: 11px; line-height: 1.4; }
+@media (max-width: 760px) {
+  .camera-capture-dev { left: 12px; width: min(340px, calc(100vw - 24px)); }
+  .app-shell:has(.layer-panel.is-open) .camera-capture-dev { visibility: hidden; }
+}

@@ -1,0 +1,8 @@
+.vector-popup { position: fixed; z-index: 6; width: max-content; max-width: 300px; overflow: auto; padding: 16px 40px 16px 18px; border: 1px solid #d5ddd5; border-radius: 12px; background: #fffffff2; color: #132b24; box-shadow: 0 8px 24px #0002; }
+.vector-popup p { margin: 8px 0 0; overflow-wrap: anywhere; }
+.vector-popup button { position: absolute; right: 6px; top: 6px; width: 30px; height: 30px; border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 24px; }
+@media (max-width: 760px) {
+  .vector-popup { padding: 12px 48px 12px 14px; }
+  .vector-popup button { width: 44px; height: 44px; top: 0; right: 0; }
+  .app-shell:has(.layer-panel.is-open) .vector-popup { display: none; }
+}

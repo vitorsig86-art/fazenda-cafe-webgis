@@ -1,0 +1,28 @@
+{
+  "name": "fazenda-cafe",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.node.json",
+    "build": "npm run typecheck && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "check": "node scripts/check-projects.cjs && node scripts/check-workspace.cjs && node scripts/check-raster-lifecycle.cjs && node scripts/check-measurements.cjs && node scripts/check-fazenda-cafe.cjs && node scripts/check-model-clipping.cjs && node scripts/check-model-crop-editor.cjs",
+    "capture-camera": "node scripts/capture-camera.cjs"
+  },
+  "dependencies": {
+    "cesium": "^1.145.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.1",
+    "@vitejs/plugin-react": "^4.7.0",
+    "typescript": "^5.9.3",
+    "vite": "^6.4.3",
+    "vite-plugin-cesium": "^1.2.23"
+  }
+}

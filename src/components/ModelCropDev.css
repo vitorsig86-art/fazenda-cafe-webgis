@@ -1,0 +1,11 @@
+.model-crop-dev { position: absolute; z-index: 4; left: calc(var(--panel-width) + 16px); bottom: 64px; width: min(340px, calc(100vw - var(--panel-width) - 32px)); max-height: calc(100dvh - var(--header-height) - 96px); overflow: auto; padding: 10px; border: 1px solid #d5ddd5; border-radius: 10px; background: #fafbf7f2; color: #21372c; box-shadow: 0 4px 18px #0002; }
+.model-crop-dev-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
+.model-crop-dev button { width: 100%; min-height: 40px; padding: 6px 8px; border: 1px solid #c3cec3; border-radius: 6px; background: #edf2e7; color: inherit; cursor: pointer; }
+.model-crop-dev button:disabled { opacity: .5; cursor: default; }
+.model-crop-dev small, .model-crop-dev p { display: block; margin: 8px 0 0; font-size: 11px; line-height: 1.4; }
+.model-crop-dev textarea { width: 100%; min-height: 155px; margin-top: 8px; resize: vertical; font: 11px/1.5 monospace; }
+@media (max-width: 760px) {
+  .model-crop-dev { left: 12px; width: min(340px, calc(100vw - 24px)); }
+  .model-crop-dev button { min-height: 44px; }
+  .app-shell:has(.layer-panel.is-open) .model-crop-dev { visibility: hidden; }
+}
