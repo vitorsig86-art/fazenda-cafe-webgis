@@ -163,7 +163,7 @@ export async function loadLayer(layer: ProjectLayerConfig): Promise<LoadedLayer>
         clampToGround: new ConstantProperty(clampToGround),
         zIndex: new ConstantProperty(style.zIndex ?? 0),
       };
-      // Enforce the configured uniform style even when GeoJSON includes
+      // Enforce the configured style even when GeoJSON includes
       // simplestyle properties such as stroke, stroke-width or fill-opacity.
       for (const entity of [...dataSource.entities.values]) {
         if (popup) registerVectorPopup(entity, popup);
@@ -176,6 +176,16 @@ export async function loadLayer(layer: ProjectLayerConfig): Promise<LoadedLayer>
           entity.polyline.zIndex = lineOptions.zIndex;
         }
         if (entity.polygon) {
+          const outlineStyle = style.outline;
+          const index = outlineStyle ? entity.properties?.getValue(time)[outlineStyle.property] : undefined;
+          const outlineColor = outlineStyle && Number.isInteger(index) && index >= 0 && index < outlineStyle.colors.length
+            ? Color.fromCssColorString(outlineStyle.colors[index])
+            : stroke;
+          const outlineOptions = {
+            ...lineOptions,
+            material: new ColorMaterialProperty(outlineColor),
+            width: new ConstantProperty(outlineStyle?.width ?? strokeWidth),
+          };
           const hierarchy = entity.polygon.hierarchy?.getValue(time) as PolygonHierarchy | undefined;
           // Ground polygon outlines do not reliably support pixel widths.
           // Draw each closed ring (including holes) as a ground polyline.
@@ -184,8 +194,9 @@ export async function loadLayer(layer: ProjectLayerConfig): Promise<LoadedLayer>
             if (positions.length > 1) {
               if (!Cartesian3.equals(positions[0], positions[positions.length - 1])) positions.push(positions[0]);
               const outline = dataSource.entities.add({
+                parent: entity,
                 properties: entity.properties,
-                polyline: new PolylineGraphics({ ...lineOptions, positions }),
+                polyline: new PolylineGraphics({ ...outlineOptions, positions }),
               });
               if (popup) registerVectorPopup(outline, popup);
             }

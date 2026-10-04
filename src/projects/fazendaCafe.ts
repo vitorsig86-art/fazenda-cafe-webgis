@@ -47,7 +47,16 @@ export const fazendaCafeProject: ProjectConfig = {
     {
       id: "talhoes", name: "Talhões", description: "Talhões da fazenda", kind: "vector", defaultVisible: true,
       source: { format: "geojson", url: `${baseUrl}/geojson/talhoes.geojson`, autoZoom: false,
-        style: { stroke: "#ffe6a3", strokeWidth: 2, fill: "#ffe6a30a", clampToGround: true, zIndex: 2 },
+        style: {
+          stroke: "#ffe6a3", strokeWidth: 2, fill: "#ffe6a30a", clampToGround: true, zIndex: 2,
+          outline: {
+            property: "indice", width: 3,
+            colors: [
+              "#E53935", "#FB8C00", "#FDD835", "#7CB342", "#00A86B", "#00ACC1",
+              "#1E88E5", "#3949AB", "#8E24AA", "#D81B60", "#FF7043", "#26A69A",
+            ],
+          },
+        },
         popup: {
           title: "Talhão", titleProperty: "nome",
           fields: [

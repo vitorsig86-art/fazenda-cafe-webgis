@@ -46,6 +46,7 @@ export type LayerSource =
     style?: {
       stroke: string;
       strokeWidth: number;
+      outline?: { property: string; width: number; colors: string[] };
       fill?: string;
       clampToGround?: boolean;
       zIndex?: number;
