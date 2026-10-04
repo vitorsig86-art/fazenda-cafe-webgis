@@ -20,7 +20,7 @@ async function main() {
   const popup = load("src/cesium/vectorPopup.ts");
   const loader = load("src/cesium/loadLayer.ts", { "./vectorPopup": popup });
   assert.equal(project.layers.length, 10);
-  assert.equal(project.layers.filter(layer => layer.defaultVisible).map(layer => layer.id).join(","), "basemap,talhoes,modelo-3d");
+  assert.equal(project.layers.filter(layer => layer.defaultVisible).map(layer => layer.id).join(","), "basemap,ortomosaico,talhoes");
   assert.equal(project.layers.filter(layer => layer.legend).length, 4);
   assert.equal(project.layers.find(layer => layer.id === "ortomosaico").legend, undefined);
   for (const layer of project.layers.filter(layer => layer.legend)) {

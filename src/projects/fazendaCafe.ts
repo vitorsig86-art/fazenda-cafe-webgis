@@ -27,7 +27,7 @@ export const fazendaCafeProject: ProjectConfig = {
       id: "basemap", name: "Bing Aerial com rótulos", description: "Bing Maps via Cesium ion", kind: "basemap", defaultVisible: true,
       source: { format: "ion-world-imagery", fallback: { url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png", credit: '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a>', maximumLevel: 19 } },
     },
-    raster("ortomosaico", "Ortomosaico", "orthomosaic", "orto", orthoBounds, 12, 21, false),
+    raster("ortomosaico", "Ortomosaico", "orthomosaic", "orto", orthoBounds, 12, 21, true),
     {
       ...raster("mds", "Modelo Digital da Superfície", "dsm", "mds", terrainBounds, 11, 20),
       legend: { type: "image", title: "Modelo Digital da Superfície", imageUrl: "/mds_tab.png", imageAlt: "Legenda do Modelo Digital da Superfície" },
@@ -81,7 +81,7 @@ export const fazendaCafeProject: ProjectConfig = {
       },
     },
     {
-      id: "modelo-3d", name: "Modelo 3D", description: "Modelo fotogramétrico via Cesium ion", kind: "3d-tiles", defaultVisible: true,
+      id: "modelo-3d", name: "Modelo 3D", description: "Modelo fotogramétrico via Cesium ion", kind: "3d-tiles", defaultVisible: false,
       source: {
         format: "3d-tiles", source: "ion", assetId: 5939302, tokenEnv: "VITE_CESIUM_3D_TOKEN",
         heightOffsetMeters: -4,
