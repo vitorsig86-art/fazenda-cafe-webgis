@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { Cesium3DTileset } from "cesium";
+import { ModelHeightAdjustment } from "./components/ModelHeightAdjustment";
+import { ModelTerrainCutout } from "./components/ModelTerrainCutout";
 import { projects } from "./projects";
 import { LayerPanel } from "./components/LayerPanel";
 import { Legend } from "./components/Legend";
@@ -18,7 +21,7 @@ export function App() {
   const [visible, setVisible] = useState(() => defaultVisibility(projects[0]));
   const [panelOpen, setPanelOpen] = useState(false);
   const { containerRef, viewer, error } = useCesiumViewer();
-  const { mapWarning, rasterOpacities, setRasterOpacity } = useProjectLayers(viewer, project, visible);
+  const { mapWarning, rasterOpacities, setRasterOpacity, loadedLayers, statuses } = useProjectLayers(viewer, project, visible);
   const legendLayers = project.layers.filter((layer) => layer.legend && visible.has(layer.id));
 
   function toggleLayer(id: string) {
@@ -44,7 +47,15 @@ export function App() {
       </header>
       {panelOpen && <button type="button" className="drawer-backdrop" aria-label="Fechar painel de camadas" onClick={() => setPanelOpen(false)} />}
       <aside id="layer-panel" aria-label="Área de trabalho e camadas" className={`layer-panel ${panelOpen ? "is-open" : ""}`}>
-        <LayerPanel project={project} visible={visible} rasterOpacities={rasterOpacities} onOpacityChange={setRasterOpacity} onToggle={toggleLayer} onClose={() => setPanelOpen(false)} />
+        <LayerPanel project={project} visible={visible} rasterOpacities={rasterOpacities} onOpacityChange={setRasterOpacity} onToggle={toggleLayer} onClose={() => setPanelOpen(false)}
+          renderModelControls={(layer) => {
+            const loaded = loadedLayers.get(layer.id);
+            const tileset = statuses[layer.id] === "ready" && loaded instanceof Cesium3DTileset ? loaded : null;
+            return <>
+              <ModelTerrainCutout viewer={viewer} tileset={tileset} clipping={layer.source.format === "3d-tiles" ? layer.source.clipping : undefined} defaultEnabled={layer.source.format === "3d-tiles" && layer.source.terrainCutout} visible={visible.has(layer.id)} />
+              <ModelHeightAdjustment viewer={viewer} tileset={tileset} visible={visible.has(layer.id)} id={layer.id} configuredOffset={layer.source.format === "3d-tiles" ? layer.source.heightOffsetMeters : undefined} />
+            </>;
+          }} />
       </aside>
       <NavigationControls viewer={viewer} homeCamera={project.initialCamera} disabled={Boolean(error)} />
       <MeasurementToolbar viewer={viewer} disabled={Boolean(error)} />

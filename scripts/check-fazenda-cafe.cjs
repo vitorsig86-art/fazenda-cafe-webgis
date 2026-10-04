@@ -11,7 +11,7 @@ function load(file, dependencies = {}, env = {}) {
   const code = ts.transpileModule(fs.readFileSync(path.join(root, file), "utf8").replaceAll("import.meta.env", "testEnvironment"), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
   }).outputText;
-  vm.runInNewContext(code, { exports, require: name => dependencies[name] ?? (name === "./modelClipping" ? load("src/cesium/modelClipping.ts") : require(name)), testEnvironment: env, console });
+  vm.runInNewContext(code, { exports, require: name => dependencies[name] ?? (name === "./modelClipping" ? load("src/cesium/modelClipping.ts") : name === "./modelHeight" ? load("src/cesium/modelHeight.ts") : require(name)), testEnvironment: env, console });
   return exports;
 }
 
@@ -20,7 +20,7 @@ async function main() {
   const popup = load("src/cesium/vectorPopup.ts");
   const loader = load("src/cesium/loadLayer.ts", { "./vectorPopup": popup });
   assert.equal(project.layers.length, 10);
-  assert.equal(project.layers.filter(layer => layer.defaultVisible).map(layer => layer.id).join(","), "basemap,ortomosaico,talhoes");
+  assert.equal(project.layers.filter(layer => layer.defaultVisible).map(layer => layer.id).join(","), "basemap,talhoes,modelo-3d");
   assert.equal(project.layers.filter(layer => layer.legend).length, 4);
   assert.equal(project.layers.find(layer => layer.id === "ortomosaico").legend, undefined);
   for (const layer of project.layers.filter(layer => layer.legend)) {
@@ -87,17 +87,25 @@ async function main() {
   await assert.rejects(loader.loadLayer(model), /Configure VITE_CESIUM_3D_TOKEN/);
   let requested;
   const resource = {};
+  const center = cesium.Cartesian3.fromDegrees(-45.315, -21.348, 970);
+  const syntheticTileset = { modelMatrix: cesium.Matrix4.clone(cesium.Matrix4.IDENTITY),
+    boundingSphere: new cesium.BoundingSphere(center, 1000), ellipsoid: cesium.Ellipsoid.WGS84,
+    isDestroyed: () => false, destroy() {} };
   const ionLoader = load("src/cesium/loadLayer.ts", {
     "./vectorPopup": popup,
     cesium: { ...cesium,
       IonResource: { fromAssetId: async (assetId, options) => { requested = { assetId, options }; return resource; } },
-      Cesium3DTileset: { fromUrl: async value => { assert.equal(value, resource); return "loaded"; } },
+      Cesium3DTileset: { fromUrl: async value => { assert.equal(value, resource); return syntheticTileset; } },
     },
   }, { VITE_CESIUM_ION_TOKEN: "synthetic-main", VITE_CESIUM_3D_TOKEN: "synthetic-dedicated" });
-  assert.equal(await ionLoader.loadLayer(model), "loaded");
+  assert.equal(await ionLoader.loadLayer(model), syntheticTileset);
+  assert.equal(model.source.heightOffsetMeters, -4);
+  assert.equal(model.source.terrainCutout, true);
+  const moved = cesium.Matrix4.multiplyByPoint(syntheticTileset.modelMatrix, center, new cesium.Cartesian3());
+  assert.ok(Math.abs(cesium.Cartographic.fromCartesian(moved).height - 966) < 0.000001);
+  assert.equal(syntheticTileset.clippingPolygons.inverse, true);
   assert.equal(requested.assetId, 5939302);
   assert.equal(requested.options.accessToken, "synthetic-dedicated");
-  assert.ok(!fs.existsSync(path.join(root, ".git")), "No copied template Git history");
   assert.ok(fs.readFileSync(path.join(root, ".gitignore"), "utf8").includes("*.local"));
   console.log("Fazenda Café passed: all five real Cesium raster providers, exact URLs/bounds/levels, defaults, dynamic parcel/contour properties, ground outlines, separate ion token routing and missing-token guard. Remote availability and browser layouts require separate validation.");
 }

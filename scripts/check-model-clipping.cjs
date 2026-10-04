@@ -50,7 +50,7 @@ async function main() {
   const results = [];
   const mockCesium = { ...cesium, Cesium3DTileset: { fromUrl: async () => { const value = { destroy() {} }; results.push(value); return value; } },
     IonResource: { fromAssetId: async (id, options) => { assert.equal(id, 17); assert.equal(options.accessToken, "synthetic"); return "synthetic-resource"; } } };
-  const loader = load("src/cesium/loadLayer.ts", { cesium: mockCesium, "./modelClipping": clipping, "./vectorPopup": {} }, { TEST_TOKEN: "synthetic" });
+  const loader = load("src/cesium/loadLayer.ts", { cesium: mockCesium, "./modelClipping": clipping, "./modelHeight": load("src/cesium/modelHeight.ts"), "./vectorPopup": {} }, { TEST_TOKEN: "synthetic" });
   for (const source of [
     { format: "3d-tiles", source: "url", url: "https://example.invalid/model.json" },
     { format: "3d-tiles", source: "ion", assetId: 17, tokenEnv: "TEST_TOKEN" },

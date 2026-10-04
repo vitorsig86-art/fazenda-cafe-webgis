@@ -3,6 +3,7 @@ import type { ProjectLayerConfig } from "../projects/types";
 import { registerVectorPopup } from "./vectorPopup";
 import { IonResource } from "cesium";
 import { applyModelClipping } from "./modelClipping";
+import { createModelHeightAdjustment } from "./modelHeight";
 import { NeverTileDiscardPolicy } from "cesium";
 
 export type LoadedLayer = ImageryLayer | GeoJsonDataSource | Cesium3DTileset;
@@ -73,6 +74,10 @@ export async function loadLayer(layer: ProjectLayerConfig): Promise<LoadedLayer>
         tileset = await Cesium3DTileset.fromUrl(layer.source.url);
       }
       try {
+        if (layer.source.heightOffsetMeters !== undefined) {
+          if (!Number.isFinite(layer.source.heightOffsetMeters)) throw new Error("Invalid model height offset.");
+          createModelHeightAdjustment(tileset).set(layer.source.heightOffsetMeters);
+        }
         if (layer.source.clipping) applyModelClipping(tileset, layer.source.clipping);
         return tileset;
       } catch (error) {

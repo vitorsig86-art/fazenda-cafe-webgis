@@ -19,8 +19,8 @@ export type LayerKind =
 export type GeographicBounds = [west: number, south: number, east: number, north: number];
 
 export type LayerSource =
-  | { format: "3d-tiles"; source?: "url"; url: string; clipping?: ModelClippingConfig }
-  | { format: "3d-tiles"; source: "ion"; assetId: number; tokenEnv: string; clipping?: ModelClippingConfig }
+  | { format: "3d-tiles"; source?: "url"; url: string; clipping?: ModelClippingConfig; heightOffsetMeters?: number; terrainCutout?: boolean }
+  | { format: "3d-tiles"; source: "ion"; assetId: number; tokenEnv: string; clipping?: ModelClippingConfig; heightOffsetMeters?: number; terrainCutout?: boolean }
   | {
     format: "ion-world-imagery";
     fallback: { url: string; credit: string; maximumLevel: number };

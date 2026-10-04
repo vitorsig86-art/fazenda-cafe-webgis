@@ -13,7 +13,7 @@ function load(file, dependencies = {}) {
   const code = ts.transpileModule(fs.readFileSync(path.join(root, file), "utf8").replaceAll("import.meta.env.DEV", "false").replaceAll("import.meta.env", "({})"), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
   }).outputText;
-  vm.runInNewContext(code, { exports, require: (name) => dependencies[name] ?? (name === "./vectorPopup" ? load("src/cesium/vectorPopup.ts") : name === "./modelClipping" ? load("src/cesium/modelClipping.ts") : require(name)), console });
+  vm.runInNewContext(code, { exports, require: (name) => dependencies[name] ?? (name === "./vectorPopup" ? load("src/cesium/vectorPopup.ts") : name === "./modelClipping" ? load("src/cesium/modelClipping.ts") : name === "./modelHeight" ? load("src/cesium/modelHeight.ts") : require(name)), console });
   return exports;
 }
 
