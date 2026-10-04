@@ -11,7 +11,7 @@ function load(file, dependencies = {}, env = {}) {
   const code = ts.transpileModule(fs.readFileSync(path.join(root, file), "utf8").replaceAll("import.meta.env", "testEnvironment"), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
   }).outputText;
-  vm.runInNewContext(code, { exports, require: name => dependencies[name] ?? (name === "./modelClipping" ? load("src/cesium/modelClipping.ts") : name === "./modelHeight" ? load("src/cesium/modelHeight.ts") : require(name)), testEnvironment: env, console });
+  vm.runInNewContext(code, { exports, require: name => dependencies[name] ?? (name === "./prepareGeoJson" ? load("src/cesium/prepareGeoJson.ts") : name === "./modelClipping" ? load("src/cesium/modelClipping.ts") : name === "./modelHeight" ? load("src/cesium/modelHeight.ts") : require(name)), testEnvironment: env, console });
   return exports;
 }
 
@@ -19,9 +19,9 @@ async function main() {
   const { fazendaCafeProject: project } = load("src/projects/fazendaCafe.ts");
   const popup = load("src/cesium/vectorPopup.ts");
   const loader = load("src/cesium/loadLayer.ts", { "./vectorPopup": popup });
-  assert.equal(project.layers.length, 10);
+  assert.equal(project.layers.length, 12);
   assert.equal(project.layers.filter(layer => layer.defaultVisible).map(layer => layer.id).join(","), "basemap,ortomosaico,talhoes");
-  assert.equal(project.layers.filter(layer => layer.legend).length, 4);
+  assert.equal(project.layers.filter(layer => layer.legend).length, 6);
   assert.equal(project.layers.find(layer => layer.id === "ortomosaico").legend, undefined);
   for (const layer of project.layers.filter(layer => layer.legend)) {
     assert.equal(layer.legend.type, "image");
@@ -51,7 +51,6 @@ async function main() {
   }
   // Real Cesium entity properties, shared metadata and dynamic values.
   for (const [id, property, values, title, suffix] of [
-    ["talhoes", "nome", ["TRAVESSIA", "PINHEIRO", "ARANAS"], "Talhão", ""],
     ["curvas", "ELEVATION", [970, 972, 0], "Curva de nível", " m"],
   ]) {
     const config = project.layers.find(layer => layer.id === id).source.popup;
@@ -65,6 +64,12 @@ async function main() {
       if (id === "curvas") assert.equal(result.fields[0].label, "Cota");
     }
   }
+  const parcel = new cesium.Entity({ properties: { nome: "BARREIRO 24", area_ha: 3.95, cafes_qtd: 20708, cafes_ha: 5243 } });
+  popup.registerVectorPopup(parcel, project.layers.find(layer => layer.id === "talhoes").source.popup);
+  assert.equal(popup.readVectorPopup(parcel).title, "BARREIRO 24");
+  assert.equal(popup.readVectorPopup(parcel).fields.map(field => field.value).join("|"), "3,95 ha|20.708|5.243 plantas/ha");
+  parcel.properties.nome.setValue("Another parcel");
+  assert.equal(popup.readVectorPopup(parcel).title, "Another parcel");
   assert.equal(popup.readVectorPopup(new cesium.Entity()), null);
   // Test the actual loader with real polygon/contour entities, without network.
   const polygon = new cesium.Entity({
@@ -80,7 +85,7 @@ async function main() {
   await vectorLoader.loadLayer(project.layers.find(layer => layer.id === "talhoes"));
   assert.ok(polygon.polygon, "Light fill preserves interior picking");
   assert.equal(dataSource.entities.values.length, 2, "Ground outline is added");
-  for (const entity of dataSource.entities.values) assert.equal(popup.readVectorPopup(entity).fields[0].value, "Dynamic parcel");
+  for (const entity of dataSource.entities.values) assert.equal(popup.readVectorPopup(entity).title, "Dynamic parcel");
   const model = project.layers.find(layer => layer.kind === "3d-tiles");
   assert.equal(model.source.assetId, 5939302);
   assert.equal(model.source.tokenEnv, "VITE_CESIUM_3D_TOKEN");

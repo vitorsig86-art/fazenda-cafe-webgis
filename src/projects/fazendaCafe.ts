@@ -81,6 +81,50 @@ export const fazendaCafeProject: ProjectConfig = {
       },
     },
     {
+      id: "microbacias-ana", name: "Microbacias ANA", description: "Microbacias delimitadas pela rede ANA", kind: "vector", defaultVisible: false, opacityControl: true,
+      source: {
+        format: "geojson", url: `${baseUrl}/geojson/microbacias-ana.geojson`, autoZoom: false, uniqueFeatureIds: true,
+        style: {
+          stroke: "#7F9B8E", strokeWidth: 1, fill: "#7F9B8E", polygonOutline: false, clampToGround: true, zIndex: 5,
+          classification: { property: "STREAM_ID", classes: {
+            "71": { fill: "#3DD563" },
+            "77": { fill: "#E775CA" },
+            "82": { fill: "#7F9B8E" },
+            "83": { fill: "#DD70EE" },
+          } },
+        },
+        popup: { title: "Microbacia", titleProperty: "STREAM_ID", titlePrefix: "Microbacia ", fields: [
+          { property: "ENCLOSED_AREA", label: "Área" },
+          { property: "PERIMETER", label: "Perímetro" },
+          { property: "NEXT_STREAM_ID", label: "Próximo trecho" },
+        ] },
+      },
+      legend: { type: "image", title: "Microbacias ANA", imageUrl: "/legends/microbacias-ana.png", imageAlt: "Microbacias ANA: 71 verde #3DD563; 77 rosa #E775CA; 82 verde acinzentado #7F9B8E; 83 violeta #DD70EE" },
+    },
+    {
+      id: "drenagem-ana", name: "Drenagem ANA", description: "Rede de drenagem classificada por ordem de Strahler", kind: "drainage", defaultVisible: false,
+      source: {
+        format: "geojson", url: `${baseUrl}/geojson/drenagem-ana.geojson`, autoZoom: false, ignoreAltitude: true, uniqueFeatureIds: true,
+        style: {
+          stroke: "#00FFFF", strokeWidth: 1, clampToGround: true, zIndex: 11,
+          classification: { property: "STRAHLER", classes: {
+            "1": { stroke: "#00FFFF", strokeWidth: 1, zIndex: 11 },
+            "2": { stroke: "#00FFFF", strokeWidth: 1.5, zIndex: 12 },
+            "3": { stroke: "#0066FF", strokeWidth: 2.5, zIndex: 13 },
+            "4": { stroke: "#0066FF", strokeWidth: 3, zIndex: 14 },
+          } },
+        },
+        popup: { title: "Trecho", titleProperty: "STREAM_ID", titlePrefix: "Trecho ", fields: [
+          { property: "STRAHLER", label: "Ordem de Strahler" },
+          { property: "DRAIN_AREA", label: "Área de contribuição" },
+          { property: "LENGTH", label: "Comprimento" },
+          { property: "LENGTH_3D", label: "Comprimento 3D" },
+          { property: "SINUOSITY", label: "Sinuosidade" },
+        ] },
+      },
+      legend: { type: "image", title: "Drenagem ANA", imageUrl: "/legends/drenagem-ana.png", imageAlt: "Ordens de Strahler: 1 ciano 1 px; 2 ciano 1,5 px; 3 azul 2,5 px; 4 azul 3 px" },
+    },
+    {
       id: "modelo-3d", name: "Modelo 3D", description: "Modelo fotogramétrico via Cesium ion", kind: "3d-tiles", defaultVisible: false,
       source: {
         format: "3d-tiles", source: "ion", assetId: 5939302, tokenEnv: "VITE_CESIUM_3D_TOKEN",

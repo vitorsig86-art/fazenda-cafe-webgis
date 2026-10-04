@@ -43,10 +43,17 @@ export type LayerSource =
     url: string;
     autoZoom?: boolean;
     popup?: VectorPopupConfig;
+    ignoreAltitude?: boolean;
+    uniqueFeatureIds?: boolean;
     style?: {
       stroke: string;
       strokeWidth: number;
       outline?: { property: string; width: number; colors: string[] };
+      polygonOutline?: boolean;
+      classification?: {
+        property: string;
+        classes: Record<string, { fill?: string; stroke?: string; strokeWidth?: number; zIndex?: number }>;
+      };
       fill?: string;
       clampToGround?: boolean;
       zIndex?: number;
@@ -60,12 +67,14 @@ export interface ProjectLayerConfig {
   kind: LayerKind;
   source: LayerSource;
   defaultVisible: boolean;
+  opacityControl?: boolean;
   legend?: LegendConfig;
 }
 
 export interface VectorPopupConfig {
   title: string;
   titleProperty?: string;
+  titlePrefix?: string;
   fields: {
     property: string;
     label?: string;

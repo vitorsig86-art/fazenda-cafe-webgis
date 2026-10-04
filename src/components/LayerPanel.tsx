@@ -51,7 +51,7 @@ export function LayerPanel({ project, visible, rasterOpacities, onOpacityChange,
                       {isModel && <small>Visualização tridimensional</small>}
                     </span>
                   </label>
-                  {section.id === "raster" && enabled && <div className="layer-opacity">
+                  {(section.id === "raster" || layer.opacityControl) && enabled && <div className="layer-opacity">
                     <div className="layer-opacity-heading">
                       <label htmlFor={`opacity-${layer.id}`}>Opacidade</label>
                       <output htmlFor={`opacity-${layer.id}`}>{opacity}%</output>

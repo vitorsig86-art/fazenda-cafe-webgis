@@ -5,10 +5,27 @@ import { IonResource } from "cesium";
 import { applyModelClipping } from "./modelClipping";
 import { createModelHeightAdjustment } from "./modelHeight";
 import { NeverTileDiscardPolicy } from "cesium";
+import { Resource } from "cesium";
+import { prepareGeoJson } from "./prepareGeoJson";
 
 export type LoadedLayer = ImageryLayer | GeoJsonDataSource | Cesium3DTileset;
 
 const fallbackLayers = new WeakSet<ImageryLayer>();
+const originalColors = new WeakMap<ColorMaterialProperty, Color>();
+
+export function setVectorOpacity(dataSource: GeoJsonDataSource, opacity: number): void {
+  for (const entity of dataSource.entities.values) {
+    for (const material of [entity.polygon?.material, entity.polyline?.material]) {
+      if (!(material instanceof ColorMaterialProperty)) continue;
+      let original = originalColors.get(material);
+      if (!original) {
+        original = Color.clone(material.color?.getValue(JulianDate.now()) ?? Color.WHITE);
+        originalColors.set(material, original);
+      }
+      material.color = new ConstantProperty(original.withAlpha(original.alpha * opacity));
+    }
+  }
+}
 
 export function assertImageryLayerReady(layer: ImageryLayer): void {
   const provider = layer.imageryProvider;
@@ -147,7 +164,10 @@ export async function loadLayer(layer: ProjectLayerConfig): Promise<LoadedLayer>
       const strokeWidth = style?.strokeWidth ?? 3;
       const fill = style?.fill ? Color.fromCssColorString(style.fill) : stroke.withAlpha(0.18);
       const clampToGround = style?.clampToGround ?? true;
-      const dataSource = await GeoJsonDataSource.load(layer.source.url, {
+      const input = layer.source.ignoreAltitude || layer.source.uniqueFeatureIds
+        ? prepareGeoJson(await Resource.fetchJson({ url: layer.source.url }), layer.id, layer.source.ignoreAltitude, layer.source.uniqueFeatureIds)
+        : layer.source.url;
+      const dataSource = await GeoJsonDataSource.load(input, {
         clampToGround,
         stroke,
         strokeWidth,
@@ -169,11 +189,19 @@ export async function loadLayer(layer: ProjectLayerConfig): Promise<LoadedLayer>
         if (popup) registerVectorPopup(entity, popup);
         entity.description = undefined;
         entity.label = undefined;
+        const classification = style.classification;
+        const classified = classification?.classes[String(entity.properties?.getValue(time)[classification.property])];
+        const entityLineOptions = {
+          ...lineOptions,
+          material: new ColorMaterialProperty(classified?.stroke ? Color.fromCssColorString(classified.stroke) : stroke),
+          width: new ConstantProperty(classified?.strokeWidth ?? strokeWidth),
+          zIndex: new ConstantProperty(classified?.zIndex ?? style.zIndex ?? 0),
+        };
         if (entity.polyline) {
-          entity.polyline.material = lineOptions.material;
-          entity.polyline.width = lineOptions.width;
-          entity.polyline.clampToGround = lineOptions.clampToGround;
-          entity.polyline.zIndex = lineOptions.zIndex;
+          entity.polyline.material = entityLineOptions.material;
+          entity.polyline.width = entityLineOptions.width;
+          entity.polyline.clampToGround = entityLineOptions.clampToGround;
+          entity.polyline.zIndex = entityLineOptions.zIndex;
         }
         if (entity.polygon) {
           const outlineStyle = style.outline;
@@ -202,10 +230,12 @@ export async function loadLayer(layer: ProjectLayerConfig): Promise<LoadedLayer>
             }
             ring.holes.forEach(addRing);
           };
-          if (hierarchy) addRing(hierarchy);
-          entity.polygon.material = new ColorMaterialProperty(fill);
+          if (hierarchy && style.polygonOutline !== false) addRing(hierarchy);
+          const entityFill = classified?.fill ? Color.fromCssColorString(classified.fill) : fill;
+          entity.polygon.material = new ColorMaterialProperty(entityFill);
+          entity.polygon.zIndex = new ConstantProperty(classified?.zIndex ?? style.zIndex ?? 0);
           entity.polygon.outline = new ConstantProperty(false);
-          if (fill.alpha === 0) entity.polygon = undefined;
+          if (entityFill.alpha === 0) entity.polygon = undefined;
         }
       }
       return dataSource;

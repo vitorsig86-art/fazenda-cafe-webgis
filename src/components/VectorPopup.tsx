@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import type { Viewer } from "cesium";
-import { readVectorPopup } from "../cesium/vectorPopup";
+import { Cartesian2, Entity, type Viewer } from "cesium";
+import { readVectorPopup, resolveVectorPopupSelection } from "../cesium/vectorPopup";
 import { placePopup, type ScreenPoint } from "./popupPosition";
 import "./VectorPopup.css";
 
@@ -21,6 +21,13 @@ export function VectorPopup({ viewer }: { viewer: Viewer | null }) {
     const rememberPoint = (event: PointerEvent) => { clickRef.current = { x: event.clientX, y: event.clientY }; };
     const clicked = (event: MouseEvent) => {
       clickRef.current = { x: event.clientX, y: event.clientY };
+      if (!viewer.isDestroyed() && readVectorPopup(viewer.selectedEntity)) {
+        const bounds = canvas.getBoundingClientRect();
+        const hits = viewer.scene.drillPick(new Cartesian2(event.clientX - bounds.left, event.clientY - bounds.top));
+        const entities = hits.map(hit => hit.id).filter((id): id is Entity => id instanceof Entity);
+        const selected = resolveVectorPopupSelection(viewer.selectedEntity, entities);
+        if (selected !== viewer.selectedEntity) viewer.selectedEntity = selected;
+      }
       update();
     };
     canvas.addEventListener("pointerdown", rememberPoint);

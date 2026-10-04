@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Cesium3DTileset, GeoJsonDataSource, ImageryLayer, type Viewer } from "cesium";
 import { applyProjectCamera } from "../cesium/projectCamera";
-import { assertImageryLayerReady, attachLayer, createBasemapFallback, isBasemapFallback, loadLayer, removeLayer, type LoadedLayer } from "../cesium/loadLayer";
+import { assertImageryLayerReady, attachLayer, createBasemapFallback, isBasemapFallback, loadLayer, removeLayer, setVectorOpacity, type LoadedLayer } from "../cesium/loadLayer";
 import { createImageryTileErrorHandler } from "../cesium/imageryTileErrors";
 import { createModelTerrainCutout } from "../cesium/modelTerrainCutout";
 import type { LayerStatus, ProjectConfig } from "../projects/types";
@@ -119,6 +119,7 @@ export function useProjectLayers(viewer: Viewer | null, project: ProjectConfig, 
           }
           resources.set(definition.id, layer);
           if (isRaster && layer instanceof ImageryLayer) layer.alpha = opacityRef.current.get(definition.id) ?? 1;
+          if (definition.opacityControl && layer instanceof GeoJsonDataSource) setVectorOpacity(layer, opacityRef.current.get(definition.id) ?? 1);
           if (layer instanceof ImageryLayer) {
             const handleTileError = createImageryTileErrorHandler(definition, setMapWarning, import.meta.env.DEV, layer.imageryProvider);
             unsubscribe.push(handleTileError.dispose);
@@ -191,14 +192,16 @@ export function useProjectLayers(viewer: Viewer | null, project: ProjectConfig, 
   function setRasterOpacity(id: string, percent: number): void {
     const definition = project.layers.find((layer) => layer.id === id);
     if (!definition || definition.kind === "basemap"
-      || (definition.source.format !== "tms" && definition.source.format !== "xyz")
+      || (definition.source.format !== "tms" && definition.source.format !== "xyz" && !(definition.source.format === "geojson" && definition.opacityControl))
       || !Number.isFinite(percent)) return;
     const value = Math.min(100, Math.max(0, percent));
     opacityRef.current.set(id, value / 100);
     setRasterOpacities((current) => ({ ...current, [id]: value }));
     const layer = loaded.current.get(id);
-    if (!viewer || viewer.isDestroyed() || !(layer instanceof ImageryLayer) || layer.isDestroyed()) return;
-    layer.alpha = value / 100;
+    if (!viewer || viewer.isDestroyed()) return;
+    if (layer instanceof ImageryLayer && !layer.isDestroyed()) layer.alpha = value / 100;
+    else if (layer instanceof GeoJsonDataSource) setVectorOpacity(layer, value / 100);
+    else return;
     viewer.scene.requestRender();
   }
 

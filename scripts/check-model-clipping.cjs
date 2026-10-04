@@ -10,7 +10,7 @@ function load(file, dependencies = {}, env = {}) {
   const code = ts.transpileModule(fs.readFileSync(path.join(root, file), "utf8").replaceAll("import.meta.env", "testEnvironment"), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
   }).outputText;
-  vm.runInNewContext(code, { exports, require: name => dependencies[name] ?? require(name), testEnvironment: env, console });
+  vm.runInNewContext(code, { exports, require: name => dependencies[name] ?? (name === "./prepareGeoJson" ? load("src/cesium/prepareGeoJson.ts") : require(name)), testEnvironment: env, console });
   return exports;
 }
 async function main() {

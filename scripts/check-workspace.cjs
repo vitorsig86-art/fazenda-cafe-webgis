@@ -84,6 +84,14 @@ for (const layer of [...sections[0].layers, ...sections[2].layers, ...sections[3
   assert.ok(!elements(row).some(({ node }) => node.type === "input" && node.props.type === "range"));
 }
 assert.match(renderToStaticMarkup(render()), /model-layer-card/);
+const microbasins = load("src/projects/fazendaCafe.ts").fazendaCafeProject.layers.find(layer => layer.id === "microbacias-ana");
+const vectorPanel = LayerPanel({ project: { ...project, layers: [microbasins] }, visible: new Set([microbasins.id]),
+  rasterOpacities: { [microbasins.id]: 35 }, onOpacityChange: (id, value) => opacityChanges.push([id, value]), onToggle() {}, onClose() {} });
+const vectorSlider = elements(vectorPanel).find(({ node }) => node.type === "input" && node.props.type === "range").node;
+assert.equal(vectorSlider.props.value, 35);
+assert.equal(vectorSlider.props["aria-label"], "Opacidade de Microbacias ANA");
+vectorSlider.props.onChange({ currentTarget: { value: "70" } });
+assert.equal(JSON.stringify(opacityChanges.at(-1)), JSON.stringify([microbasins.id, 70]));
 const { Legend } = load("src/components/Legend.tsx");
 for (const layer of project.layers.filter(layer => layer.legend)) {
   assert.equal(Legend({ ...layer.legend, visibility: false }), null);
