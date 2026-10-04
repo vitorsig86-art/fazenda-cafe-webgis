@@ -64,7 +64,13 @@ export interface ProjectLayerConfig {
 
 export interface VectorPopupConfig {
   title: string;
-  fields: { property: string; label?: string; suffix?: string }[];
+  titleProperty?: string;
+  fields: {
+    property: string;
+    label?: string;
+    suffix?: string;
+    numberFormat?: { locale: string; decimalPlaces: number };
+  }[];
 }
 
 // Geographic polygon vertices in longitude/latitude degrees, without a repeated closing vertex.

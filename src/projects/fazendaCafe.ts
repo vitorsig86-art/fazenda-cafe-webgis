@@ -48,7 +48,14 @@ export const fazendaCafeProject: ProjectConfig = {
       id: "talhoes", name: "Talhões", description: "Talhões da fazenda", kind: "vector", defaultVisible: true,
       source: { format: "geojson", url: `${baseUrl}/geojson/talhoes.geojson`, autoZoom: false,
         style: { stroke: "#ffe6a3", strokeWidth: 2, fill: "#ffe6a30a", clampToGround: true, zIndex: 2 },
-        popup: { title: "Talhão", fields: [{ property: "nome" }] },
+        popup: {
+          title: "Talhão", titleProperty: "nome",
+          fields: [
+            { property: "area_ha", label: "Área", numberFormat: { locale: "pt-BR", decimalPlaces: 2 }, suffix: " ha" },
+            { property: "cafes_qtd", label: "Cafeeiros", numberFormat: { locale: "pt-BR", decimalPlaces: 0 } },
+            { property: "cafes_ha", label: "Densidade", numberFormat: { locale: "pt-BR", decimalPlaces: 0 }, suffix: " plantas/ha" },
+          ],
+        },
       },
     },
     {
