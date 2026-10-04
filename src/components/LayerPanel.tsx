@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import type { ProjectConfig, ProjectLayerConfig } from "../projects/types";
 import "./LayerPanel.css";
 
@@ -9,7 +8,6 @@ interface Props {
   onOpacityChange: (id: string, percent: number) => void;
   onToggle: (id: string) => void;
   onClose: () => void;
-  renderModelControls?: (layer: ProjectLayerConfig) => ReactNode;
 }
 
 export function getWorkspaceSections(layers: ProjectLayerConfig[]) {
@@ -21,7 +19,7 @@ export function getWorkspaceSections(layers: ProjectLayerConfig[]) {
   ];
 }
 
-export function LayerPanel({ project, visible, rasterOpacities, onOpacityChange, onToggle, onClose, renderModelControls }: Props) {
+export function LayerPanel({ project, visible, rasterOpacities, onOpacityChange, onToggle, onClose }: Props) {
   return (
     <>
       <div className="panel-heading workspace-project">
@@ -53,7 +51,6 @@ export function LayerPanel({ project, visible, rasterOpacities, onOpacityChange,
                       {isModel && <small>Visualização tridimensional</small>}
                     </span>
                   </label>
-                  {isModel && renderModelControls?.(layer)}
                   {section.id === "raster" && enabled && <div className="layer-opacity">
                     <div className="layer-opacity-heading">
                       <label htmlFor={`opacity-${layer.id}`}>Opacidade</label>

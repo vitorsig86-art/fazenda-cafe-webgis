@@ -62,19 +62,23 @@ async function checkHookOrdering() {
   const collection = new cesium.ImageryLayerCollection();
   const dataSources = new cesium.DataSourceCollection();
   const primitives = new cesium.PrimitiveCollection();
+  cesium.buildModuleUrl.setBaseUrl("https://example.invalid/cesium/");
+  const globe = new cesium.Globe();
+  let cameraApplications = 0;
   const viewer = {
     isDestroyed: () => false,
     imageryLayers: collection,
     dataSources,
     camera: { cancelFlight() {} },
-    scene: { requestRender() {}, primitives },
+    scene: { requestRender() {}, primitives, globe, context: { webgl2: true } },
   };
   const pending = [];
   const created = new Map();
   const loadCounts = new Map();
   const { useProjectLayers } = load("src/hooks/useProjectLayers.ts", {
     react,
-    "../cesium/projectCamera": { applyProjectCamera() {} },
+    "../cesium/projectCamera": { applyProjectCamera() { cameraApplications++; } },
+    "../cesium/modelTerrainCutout": load("src/cesium/modelTerrainCutout.ts"),
     "../cesium/loadLayer": {
       ...loader,
       loadLayer: async (definition) => {
@@ -86,6 +90,7 @@ async function checkHookOrdering() {
           layer = new cesium.GeoJsonDataSource(definition.id);
         } else if (definition.source.format === "3d-tiles") {
           layer = new cesium.Cesium3DTileset();
+          if (definition.source.clipping) load("src/cesium/modelClipping.ts").applyModelClipping(layer, definition.source.clipping);
         } else layer = await loader.loadLayer(definition);
         created.set(definition.id, layer);
         return layer;
@@ -96,7 +101,11 @@ async function checkHookOrdering() {
     },
     "../cesium/imageryTileErrors": { createImageryTileErrorHandler: () => Object.assign(() => {}, { dispose() {} }) },
   });
-  const hookProject = project;
+  let hookProject = { ...project, layers: project.layers.map((layer) => layer.source.format === "3d-tiles" ? {
+    ...layer, source: { ...layer.source, terrainCutout: true, clipping: {
+      inverse: true, positions: [[-45.316, -21.349], [-45.313, -21.349], [-45.313, -21.346]],
+    } },
+  } : layer) };
   let visible = new Set();
   const render = () => {
     cursor = 0;
@@ -163,21 +172,53 @@ async function checkHookOrdering() {
   for (const definition of project.layers.filter((entry) => entry.source.format === "geojson" || entry.source.format === "3d-tiles")) {
     visible = new Set([...visible, definition.id]);
     render();
+    if (definition.source.format === "3d-tiles") {
+      visible = new Set([...visible].filter((id) => id !== definition.id));
+      render();
+      await flush();
+      assert.equal(created.get(definition.id).show, false, "OFF while loading must win over the completed request");
+      assert.equal(globe.clippingPolygons, undefined, "A hidden loaded model must not clip terrain");
+      visible = new Set([...visible, definition.id]);
+      render();
+    }
     await flush();
     const layer = created.get(definition.id);
     assert.ok(layer);
+    const cutout = globe.clippingPolygons;
+    if (definition.source.format === "3d-tiles") {
+      assert.ok(cutout.enabled);
+      assert.equal(cutout.inverse, false);
+      assert.notEqual(cutout, layer.clippingPolygons);
+      assert.notEqual(cutout.get(0), layer.clippingPolygons.get(0));
+    }
     for (let round = 0; round < 4; round++) {
       visible = new Set([...visible].filter((id) => id !== definition.id));
       render();
       assert.equal(layer.show, false);
+      if (definition.source.format === "3d-tiles") assert.equal(cutout.enabled, false);
       visible = new Set([...visible, definition.id]);
       render();
       assert.equal(layer.show, true);
+      if (definition.source.format === "3d-tiles") {
+        assert.equal(globe.clippingPolygons, cutout);
+        assert.equal(cutout.enabled, true);
+        assert.equal(cameraApplications, 1, "Activating a model must not reposition the camera");
+        assert.equal(created.get(first).show, true, "Imagery visibility is retained across terrain clipping");
+        assert.equal(created.get(second).alpha, 0.45);
+      }
     }
     assert.equal(loadCounts.get(definition.id), 1);
     render().setRasterOpacity(definition.id, 25);
     assert.equal(layer.alpha, undefined, "Vectors and 3D Tiles must not receive raster opacity");
   }
+  const previousCutout = globe.clippingPolygons;
+  visible = new Set();
+  hookProject = { ...hookProject, id: "another-project", layers: [] };
+  render();
+  await flush();
+  assert.equal(globe.clippingPolygons, undefined, "Project switch removes the owned terrain cutout");
+  assert.equal(previousCutout.length, 0);
+  assert.equal(previousCutout.enabled, false);
   // Cleanup must also dispose of cached hidden layers.
   slots.forEach((slot) => slot?.cleanup?.());
   assert.equal(collection.length, 0);
@@ -186,6 +227,7 @@ async function checkHookOrdering() {
   collection.destroy();
   dataSources.destroy();
   primitives.destroy();
+  globe.destroy();
   console.log("Actual hook passed: all raster opacity values 0-100%, independent simultaneous alpha, retained opacity, vector/3D toggles, provider reuse and cleanup.");
 }
 

@@ -15,11 +15,53 @@ function load(file, dependencies = {}, env = {}) {
 }
 async function main() {
   const clipping = load("src/cesium/modelClipping.ts");
+  const { createModelTerrainCutout } = load("src/cesium/modelTerrainCutout.ts", { "./modelClipping": clipping });
   const config = { inverse: true, positions: [[-45.316, -21.349], [-45.313, -21.349], [-45.313, -21.346], [-45.316, -21.346]] };
   const collection = clipping.createModelClipping(config);
   assert.ok(collection instanceof cesium.ClippingPolygonCollection);
   assert.ok(collection.get(0) instanceof cesium.ClippingPolygon);
   assert.equal(collection.inverse, true);
+  cesium.buildModuleUrl.setBaseUrl("https://example.invalid/cesium/");
+  const globe = new cesium.Globe();
+  let destroyed = false;
+  const viewer = { isDestroyed: () => destroyed, scene: { globe, context: { webgl2: true }, requestRender() {} } };
+  const cutout = createModelTerrainCutout(viewer, config);
+  cutout.setVisible(false);
+  assert.equal(globe.clippingPolygons, undefined);
+  cutout.setVisible(true);
+  const terrainCollection = globe.clippingPolygons;
+  assert.notEqual(terrainCollection, collection);
+  assert.equal(terrainCollection.inverse, false);
+  assert.deepEqual(terrainCollection.get(0).positions, collection.get(0).positions);
+  cutout.setVisible(false);
+  assert.equal(terrainCollection.enabled, false);
+  cutout.setVisible(true);
+  cutout.dispose();
+  assert.equal(terrainCollection.length, 0);
+  assert.equal(terrainCollection.enabled, false);
+  assert.equal(globe.clippingPolygons, undefined);
+  // Never replace another owner's clipping collection.
+  globe.clippingPolygons = clipping.createModelClipping(config);
+  const foreign = globe.clippingPolygons;
+  const guarded = createModelTerrainCutout(viewer, config);
+  guarded.setVisible(true);
+  guarded.dispose();
+  assert.equal(globe.clippingPolygons, foreign);
+  assert.equal(foreign.length, 1);
+  globe.clippingPolygons = undefined;
+  viewer.scene.context.webgl2 = false;
+  const unsupported = createModelTerrainCutout(viewer, config);
+  unsupported.setVisible(true);
+  assert.equal(globe.clippingPolygons, undefined);
+  unsupported.dispose();
+  viewer.scene.context.webgl2 = true;
+  const unmounted = createModelTerrainCutout(viewer, config);
+  unmounted.setVisible(true);
+  const owned = globe.clippingPolygons;
+  globe.destroy();
+  destroyed = true;
+  assert.doesNotThrow(() => unmounted.dispose());
+  assert.equal(owned.length, 0);
   assert.equal(collection.enabled, true);
   collection.get(0).positions.forEach((p, i) => {
     const degrees = clipping.geographicVertex(p);

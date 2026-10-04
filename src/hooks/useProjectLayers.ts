@@ -3,6 +3,7 @@ import { Cesium3DTileset, GeoJsonDataSource, ImageryLayer, type Viewer } from "c
 import { applyProjectCamera } from "../cesium/projectCamera";
 import { assertImageryLayerReady, attachLayer, createBasemapFallback, isBasemapFallback, loadLayer, removeLayer, type LoadedLayer } from "../cesium/loadLayer";
 import { createImageryTileErrorHandler } from "../cesium/imageryTileErrors";
+import { createModelTerrainCutout } from "../cesium/modelTerrainCutout";
 import type { LayerStatus, ProjectConfig } from "../projects/types";
 
 export function useProjectLayers(viewer: Viewer | null, project: ProjectConfig, visible: Set<string>) {
@@ -11,6 +12,7 @@ export function useProjectLayers(viewer: Viewer | null, project: ProjectConfig, 
   const [rasterOpacities, setRasterOpacities] = useState<Record<string, number>>({});
   const visibleRef = useRef(visible);
   const loadVisibleTilesRef = useRef<(() => void) | null>(null);
+  const terrainCutouts = useRef(new Map<string, ReturnType<typeof createModelTerrainCutout>>());
   visibleRef.current = visible;
   const [statuses, setStatuses] = useState<Record<string, LayerStatus>>({});
   const [mapWarning, setMapWarning] = useState<string | null>(null);
@@ -59,12 +61,19 @@ export function useProjectLayers(viewer: Viewer | null, project: ProjectConfig, 
               removeLayer(viewer, layer);
               return;
             }
+            if (definition.source.format === "3d-tiles" && definition.source.terrainCutout && definition.source.clipping) {
+              const cutout = createModelTerrainCutout(viewer, definition.source.clipping);
+              terrainCutouts.current.set(definition.id, cutout);
+              cutout.setVisible(layer.show);
+            }
             setStatuses((current) => ({ ...current, [definition.id]: "ready" }));
             viewer.scene.requestRender();
           } catch {
             if (cancelled || viewer.isDestroyed()) return;
             const failedLayer = resources.get(definition.id);
             if (failedLayer) {
+              terrainCutouts.current.get(definition.id)?.dispose();
+              terrainCutouts.current.delete(definition.id);
               removeLayer(viewer, failedLayer);
               resources.delete(definition.id);
             }
@@ -160,6 +169,8 @@ export function useProjectLayers(viewer: Viewer | null, project: ProjectConfig, 
       if (loadVisibleTilesRef.current === loadVisibleTiles) loadVisibleTilesRef.current = null;
       if (!viewer.isDestroyed()) viewer.camera.cancelFlight();
       unsubscribe.forEach((remove) => remove());
+      for (const cutout of terrainCutouts.current.values()) cutout.dispose();
+      terrainCutouts.current.clear();
       for (const layer of resources.values()) removeLayer(viewer, layer);
       resources.clear();
       if (!viewer.isDestroyed()) viewer.scene.requestRender();
@@ -171,6 +182,7 @@ export function useProjectLayers(viewer: Viewer | null, project: ProjectConfig, 
     for (const [id, layer] of loaded.current) {
       if (layer instanceof ImageryLayer) assertImageryLayerReady(layer);
       layer.show = visible.has(id);
+      terrainCutouts.current.get(id)?.setVisible(layer.show);
     }
     loadVisibleTilesRef.current?.();
     viewer.scene.requestRender();
@@ -190,5 +202,5 @@ export function useProjectLayers(viewer: Viewer | null, project: ProjectConfig, 
     viewer.scene.requestRender();
   }
 
-  return { statuses, mapWarning, rasterOpacities, setRasterOpacity, loadedLayers: loaded.current };
+  return { statuses, mapWarning, rasterOpacities, setRasterOpacity };
 }
