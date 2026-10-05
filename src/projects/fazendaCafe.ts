@@ -26,7 +26,7 @@ export const fazendaCafeProject: ProjectConfig = {
     { id: "basemap", title: "Mapa base", layerIds: ["basemap"] },
     { id: "drone-rasters", title: "Rasters de drone", layerIds: ["ortomosaico", "mds", "mdt", "declividade", "orientacao-solar"] },
     { id: "drone-vectors", title: "Vetores de drone", layerIds: ["talhoes", "curvas", "drenagem"] },
-    { id: "macro", title: "Análise Macro", layerIds: ["dem-macro", "curvas-5m-macro", "drenagem-ana", "microbacias-ana"] },
+    { id: "macro", title: "Análise Macro", layerIds: ["dem-macro", "curvas-5m-macro", "drenagem-ana", "microbacias-ana", "pedologia-ibge"] },
     { id: "model", title: "Modelo 3D", layerIds: ["modelo-3d"] },
   ],
   layers: [
@@ -138,6 +138,29 @@ export const fazendaCafeProject: ProjectConfig = {
         ] },
       },
       legend: { type: "image", title: "Drenagem ANA", imageUrl: "/legends/drenagem-ana.png", imageAlt: "Ordens de Strahler: 1 ciano 1 px; 2 ciano 1,5 px; 3 azul 2,5 px; 4 azul 3 px" },
+    },
+    {
+      id: "pedologia-ibge", name: "Pedologia IBGE", description: "Mapeamento de solos IBGE para contexto macro", kind: "vector", defaultVisible: false,
+      source: {
+        format: "geojson", url: `${baseUrl}/geojson/pedologia_ibge.geojson`, autoZoom: false,
+        style: { stroke: "#795548", strokeWidth: 2, fill: "rgba(184, 135, 91, 0.30)", clampToGround: true, zIndex: 1 },
+        popup: {
+          title: "Pedologia IBGE", hideEmptyFields: true, normalizeWhitespace: true,
+          fields: [
+            { property: "nom_unidad", label: "Unidade" },
+            { property: "legenda", label: "Classe de solo" },
+            { property: "ordem", label: "Ordem" },
+            { property: "subordem", label: "Subordem" },
+            { property: "grande_gru", label: "Grande grupo" },
+            { property: "subgrupos", label: "Subgrupo" },
+            { property: "textura", label: "Textura" },
+            { property: "horizonte", label: "Horizonte A" },
+            { property: "relevo", label: "Relevo" },
+            { property: "componente", label: "Composição da unidade" },
+            { property: "inclu_p1", label: "Inclusões" },
+          ],
+        },
+      },
     },
     {
       id: "modelo-3d", name: "Modelo 3D", description: "Modelo fotogramétrico via Cesium ion", kind: "3d-tiles", defaultVisible: false,

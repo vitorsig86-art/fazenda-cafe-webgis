@@ -75,6 +75,8 @@ export interface VectorPopupConfig {
   title: string;
   titleProperty?: string;
   titlePrefix?: string;
+  hideEmptyFields?: boolean;
+  normalizeWhitespace?: boolean;
   fields: {
     property: string;
     label?: string;

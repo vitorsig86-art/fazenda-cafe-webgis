@@ -35,18 +35,24 @@ export function readVectorPopup(entity: Entity | undefined) {
   const properties = entity.properties?.getValue(JulianDate.now()) ?? {};
   return {
     title: config.titleProperty && properties[config.titleProperty] != null ? `${config.titlePrefix ?? ""}${properties[config.titleProperty]}` : config.title,
-    fields: config.fields.map((field) => {
-      const value = properties[field.property];
+    fields: config.fields.flatMap((field) => {
+      const rawValue = properties[field.property];
+      const value = config.normalizeWhitespace && typeof rawValue === "string"
+        ? rawValue.replace(/\s+/g, " ").trim()
+        : rawValue;
+      if (config.hideEmptyFields && (value == null
+        || (typeof value === "number" && !Number.isFinite(value))
+        || (typeof value === "string" && (value.trim() === "" || /^(null|undefined|nan)$/i.test(value.trim()))))) return [];
       const formatted = field.numberFormat && typeof value === "number" && Number.isFinite(value)
         ? new Intl.NumberFormat(field.numberFormat.locale, {
           minimumFractionDigits: field.numberFormat.decimalPlaces,
           maximumFractionDigits: field.numberFormat.decimalPlaces,
         }).format(value)
         : String(value);
-      return {
+      return [{
         label: field.label,
         value: value == null ? "—" : `${formatted}${field.suffix ?? ""}`,
-      };
+      }];
     }),
   };
 }
