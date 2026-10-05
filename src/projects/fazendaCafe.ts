@@ -27,6 +27,7 @@ export const fazendaCafeProject: ProjectConfig = {
       id: "basemap", name: "Bing Aerial com rótulos", description: "Bing Maps via Cesium ion", kind: "basemap", defaultVisible: true,
       source: { format: "ion-world-imagery", fallback: { url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png", credit: '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a>', maximumLevel: 19 } },
     },
+    raster("dem-macro", "DEM Macro", "raster", "macro", [-67.5, -21.943045533, -45.0, 0.0], 4, 13),
     raster("ortomosaico", "Ortomosaico", "orthomosaic", "orto", orthoBounds, 12, 21, true),
     {
       ...raster("mds", "Modelo Digital da Superfície", "dsm", "mds", terrainBounds, 11, 20),
