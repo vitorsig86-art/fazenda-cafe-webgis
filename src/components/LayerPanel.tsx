@@ -10,7 +10,15 @@ interface Props {
   onClose: () => void;
 }
 
-export function getWorkspaceSections(layers: ProjectLayerConfig[]) {
+export function getWorkspaceSections(layers: ProjectLayerConfig[], groups?: ProjectConfig["layerGroups"]) {
+  if (groups) {
+    const layersById = new Map(layers.map((layer) => [layer.id, layer]));
+    return groups.map((group) => ({
+      id: group.id,
+      title: group.title,
+      layers: group.layerIds.map((id) => layersById.get(id)).filter((layer): layer is ProjectLayerConfig => layer !== undefined),
+    }));
+  }
   return [
     { id: "basemap", title: "Mapa base", layers: layers.filter((layer) => layer.kind === "basemap") },
     { id: "raster", title: "Rasters", layers: layers.filter((layer) => layer.kind !== "basemap" && (layer.source.format === "tms" || layer.source.format === "xyz")) },
@@ -29,14 +37,15 @@ export function LayerPanel({ project, visible, rasterOpacities, onOpacityChange,
         </div>
         <button type="button" className="icon-button mobile-only" onClick={onClose} aria-label="Fechar painel de camadas">×</button>
       </div>
-      {getWorkspaceSections(project.layers).map((section) => (
+      {getWorkspaceSections(project.layers, project.layerGroups).map((section) => (
         <section key={section.id} className="workspace-section" aria-labelledby={`workspace-${section.id}`}>
           <h3 id={`workspace-${section.id}`}>{section.title}</h3>
           <div className="layer-list">
             {section.layers.map((layer) => {
               const enabled = visible.has(layer.id);
               const opacity = rasterOpacities[layer.id] ?? 100;
-              const isModel = section.id === "model";
+              const isModel = layer.source.format === "3d-tiles";
+              const isRaster = layer.kind !== "basemap" && (layer.source.format === "tms" || layer.source.format === "xyz");
               return (
                 <div key={layer.id} className={`layer-card ${enabled ? "is-active" : ""} ${isModel ? "model-layer-card" : ""}`}>
                   <label className="layer-toggle">
@@ -51,7 +60,7 @@ export function LayerPanel({ project, visible, rasterOpacities, onOpacityChange,
                       {isModel && <small>Visualização tridimensional</small>}
                     </span>
                   </label>
-                  {(section.id === "raster" || layer.opacityControl) && enabled && <div className="layer-opacity">
+                  {(isRaster || layer.opacityControl) && enabled && <div className="layer-opacity">
                     <div className="layer-opacity-heading">
                       <label htmlFor={`opacity-${layer.id}`}>Opacidade</label>
                       <output htmlFor={`opacity-${layer.id}`}>{opacity}%</output>

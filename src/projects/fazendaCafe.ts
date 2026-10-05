@@ -22,6 +22,13 @@ export const fazendaCafeProject: ProjectConfig = {
     pitch: -90.00,
     roll: 0.00,
   },
+  layerGroups: [
+    { id: "basemap", title: "Mapa base", layerIds: ["basemap"] },
+    { id: "drone-rasters", title: "Rasters de drone", layerIds: ["ortomosaico", "mds", "mdt", "declividade", "orientacao-solar"] },
+    { id: "drone-vectors", title: "Vetores de drone", layerIds: ["talhoes", "curvas", "drenagem"] },
+    { id: "macro", title: "Análise Macro", layerIds: ["dem-macro", "curvas-5m-macro", "drenagem-ana", "microbacias-ana"] },
+    { id: "model", title: "Modelo 3D", layerIds: ["modelo-3d"] },
+  ],
   layers: [
     {
       id: "basemap", name: "Bing Aerial com rótulos", description: "Bing Maps via Cesium ion", kind: "basemap", defaultVisible: true,

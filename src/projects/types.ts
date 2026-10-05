@@ -106,6 +106,7 @@ export interface ProjectConfig {
   bounds: GeographicBounds;
   initialCamera: CameraConfig;
   layers: ProjectLayerConfig[];
+  layerGroups?: { id: string; title: string; layerIds: string[] }[];
 }
 
 export type LayerStatus = "idle" | "loading" | "ready" | "fallback" | "error";
