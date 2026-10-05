@@ -26,7 +26,7 @@ export const fazendaCafeProject: ProjectConfig = {
     { id: "basemap", title: "Mapa base", layerIds: ["basemap"] },
     { id: "drone-rasters", title: "Rasters de drone", layerIds: ["ortomosaico", "mds", "mdt", "declividade", "orientacao-solar"] },
     { id: "drone-vectors", title: "Vetores de drone", layerIds: ["talhoes", "curvas", "drenagem"] },
-    { id: "macro", title: "Análise Macro", layerIds: ["dem-macro", "curvas-5m-macro", "drenagem-ana", "microbacias-ana", "pedologia-ibge"] },
+    { id: "macro", title: "Análise Macro", layerIds: ["dem-macro", "curvas-5m-macro", "drenagem-ana", "microbacias-ana", "pedologia-ibge", "limites-municipais"] },
     { id: "model", title: "Modelo 3D", layerIds: ["modelo-3d"] },
   ],
   layers: [
@@ -158,6 +158,22 @@ export const fazendaCafeProject: ProjectConfig = {
             { property: "relevo", label: "Relevo" },
             { property: "componente", label: "Composição da unidade" },
             { property: "inclu_p1", label: "Inclusões" },
+          ],
+        },
+      },
+    },
+    {
+      id: "limites-municipais", name: "Limites municipais", description: "Limites municipais para contexto macro", kind: "vector", defaultVisible: false,
+      source: {
+        format: "geojson", url: `${baseUrl}/geojson/limite_municipios.geojson`, autoZoom: false,
+        style: { stroke: "#8B3A3A", strokeWidth: 3, fill: "rgba(139, 58, 58, 0.05)", clampToGround: true, zIndex: 1 },
+        popup: {
+          title: "Limites municipais", titleProperty: "NM_MUN", hideEmptyFields: true, normalizeWhitespace: true,
+          fields: [
+            { property: "NM_MUN", label: "Município" },
+            { property: "SIGLA_UF", label: "UF" },
+            { property: "CD_MUN", label: "Código IBGE" },
+            { property: "AREA_KM2", label: "Área municipal", numberFormat: { locale: "pt-BR", decimalPlaces: 3 }, suffix: " km²" },
           ],
         },
       },
