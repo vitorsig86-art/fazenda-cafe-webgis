@@ -117,27 +117,25 @@ export const fazendaCafeProject: ProjectConfig = {
       legend: { type: "image", title: "Microbacias ANA", imageUrl: "/legends/microbacias-ana.png", imageAlt: "Microbacias ANA: 71 verde #3DD563; 77 rosa #E775CA; 82 verde acinzentado #7F9B8E; 83 violeta #DD70EE" },
     },
     {
-      id: "drenagem-ana", name: "Drenagem ANA", description: "Rede de drenagem classificada por ordem de Strahler", kind: "drainage", defaultVisible: false,
+      id: "drenagem-ana", name: "Drenagem ANA", description: "Rede ANA classificada por ordem da drenagem", kind: "drainage", defaultVisible: false,
       source: {
-        format: "geojson", url: `${baseUrl}/geojson/drenagem-ana.geojson`, autoZoom: false, ignoreAltitude: true, uniqueFeatureIds: true,
+        format: "geojson", url: `${baseUrl}/geojson/drenagem_ana.geojson`, autoZoom: false, ignoreAltitude: true, uniqueFeatureIds: true,
         style: {
-          stroke: "#00FFFF", strokeWidth: 1, clampToGround: true, zIndex: 11,
-          classification: { property: "STRAHLER", classes: {
-            "1": { stroke: "#00FFFF", strokeWidth: 1, zIndex: 11 },
-            "2": { stroke: "#00FFFF", strokeWidth: 1.5, zIndex: 12 },
-            "3": { stroke: "#0066FF", strokeWidth: 2.5, zIndex: 13 },
-            "4": { stroke: "#0066FF", strokeWidth: 3, zIndex: 14 },
+          stroke: "#00A8FF", strokeWidth: 2, clampToGround: true, zIndex: 11,
+          classification: { property: "nuordemcda", classes: {
+            "5": { stroke: "#00A8FF", strokeWidth: 2, zIndex: 11 },
+            "6": { stroke: "#0057D9", strokeWidth: 3.5, zIndex: 12 },
           } },
         },
-        popup: { title: "Trecho", titleProperty: "STREAM_ID", titlePrefix: "Trecho ", fields: [
-          { property: "STRAHLER", label: "Ordem de Strahler" },
-          { property: "DRAIN_AREA", label: "Área de contribuição" },
-          { property: "LENGTH", label: "Comprimento" },
-          { property: "LENGTH_3D", label: "Comprimento 3D" },
-          { property: "SINUOSITY", label: "Sinuosidade" },
+        popup: { title: "Drenagem ANA", hideEmptyFields: true, normalizeWhitespace: true, fields: [
+          { property: "nuordemcda", label: "Ordem da drenagem" },
+          { property: "nunivotcda", label: "Nível" },
+          { property: "nucompcda", label: "Comprimento", numberFormat: { locale: "pt-BR", decimalPlaces: 3, parseNumericString: true }, suffix: " km" },
+          { property: "nuareabacc", label: "Área da bacia contribuinte", numberFormat: { locale: "pt-BR", decimalPlaces: 3, parseNumericString: true }, suffix: " km²" },
+          { property: "cocursodag", label: "Código do curso d'água" },
+          { property: "dsversao", label: "Base ANA" },
         ] },
       },
-      legend: { type: "image", title: "Drenagem ANA", imageUrl: "/legends/drenagem-ana.png", imageAlt: "Ordens de Strahler: 1 ciano 1 px; 2 ciano 1,5 px; 3 azul 2,5 px; 4 azul 3 px" },
     },
     {
       id: "pedologia-ibge", name: "Pedologia IBGE", description: "Mapeamento de solos IBGE para contexto macro", kind: "vector", defaultVisible: false,
