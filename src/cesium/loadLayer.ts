@@ -13,6 +13,16 @@ export type LoadedLayer = ImageryLayer | GeoJsonDataSource | Cesium3DTileset;
 const fallbackLayers = new WeakSet<ImageryLayer>();
 const originalColors = new WeakMap<ColorMaterialProperty, Color>();
 
+function categoricalFill(value: unknown, colors: string[], opacity: number): Color | undefined {
+  if (value == null || colors.length === 0) return undefined;
+  const key = String(value);
+  let hash = 2166136261;
+  for (let index = 0; index < key.length; index++) {
+    hash = Math.imul(hash ^ key.charCodeAt(index), 16777619);
+  }
+  return Color.fromCssColorString(colors[(hash >>> 0) % colors.length]).withAlpha(opacity);
+}
+
 export function setVectorOpacity(dataSource: GeoJsonDataSource, opacity: number): void {
   for (const entity of dataSource.entities.values) {
     for (const material of [entity.polygon?.material, entity.polyline?.material]) {
@@ -231,7 +241,11 @@ export async function loadLayer(layer: ProjectLayerConfig): Promise<LoadedLayer>
             ring.holes.forEach(addRing);
           };
           if (hierarchy && style.polygonOutline !== false) addRing(hierarchy);
-          const entityFill = classified?.fill ? Color.fromCssColorString(classified.fill) : fill;
+          const palette = style.fillByProperty;
+          const paletteFill = palette
+            ? categoricalFill(entity.properties?.getValue(time)[palette.property], palette.colors, palette.opacity)
+            : undefined;
+          const entityFill = paletteFill ?? (classified?.fill ? Color.fromCssColorString(classified.fill) : fill);
           entity.polygon.material = new ColorMaterialProperty(entityFill);
           entity.polygon.zIndex = new ConstantProperty(classified?.zIndex ?? style.zIndex ?? 0);
           entity.polygon.outline = new ConstantProperty(false);

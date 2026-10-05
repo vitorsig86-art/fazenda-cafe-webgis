@@ -50,6 +50,7 @@ export type LayerSource =
       strokeWidth: number;
       outline?: { property: string; width: number; colors: string[] };
       polygonOutline?: boolean;
+      fillByProperty?: { property: string; colors: string[]; opacity: number };
       classification?: {
         property: string;
         classes: Record<string, { fill?: string; stroke?: string; strokeWidth?: number; zIndex?: number }>;

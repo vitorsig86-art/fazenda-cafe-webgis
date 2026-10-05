@@ -107,21 +107,19 @@ export const fazendaCafeProject: ProjectConfig = {
       source: {
         format: "geojson", url: `${baseUrl}/geojson/microbacias-ana.geojson`, autoZoom: false, uniqueFeatureIds: true,
         style: {
-          stroke: "#7F9B8E", strokeWidth: 1, fill: "#7F9B8E", polygonOutline: false, clampToGround: true, zIndex: 5,
-          classification: { property: "STREAM_ID", classes: {
-            "71": { fill: "#3DD563" },
-            "77": { fill: "#E775CA" },
-            "82": { fill: "#7F9B8E" },
-            "83": { fill: "#DD70EE" },
-          } },
+          stroke: "#47534D", strokeWidth: 1.5, fill: "rgba(127, 155, 142, 0.32)", clampToGround: true, zIndex: 5,
+          fillByProperty: { property: "STREAM_ID", opacity: 0.32, colors: [
+            "#78A58C", "#C18D76", "#7A9EB8", "#BAA168", "#A58BB4", "#6EA9A5",
+            "#BF869E", "#98A76E", "#8B91B5", "#C49D80", "#A6B6B2", "#A79A87",
+          ] },
         },
-        popup: { title: "Microbacia", titleProperty: "STREAM_ID", titlePrefix: "Microbacia ", fields: [
-          { property: "ENCLOSED_AREA", label: "Área" },
+        popup: { title: "Microbacia de Captação Macro", hideEmptyFields: true, normalizeWhitespace: true, fields: [
+          { property: "STREAM_ID", label: "ID da drenagem" },
+          { property: "NEXT_STREAM_ID", label: "Próxima drenagem" },
+          { property: "ENCLOSED_AREA", label: "Área de captação" },
           { property: "PERIMETER", label: "Perímetro" },
-          { property: "NEXT_STREAM_ID", label: "Próximo trecho" },
         ] },
       },
-      legend: { type: "image", title: "Microbacias ANA", imageUrl: "/legends/microbacias-ana.png", imageAlt: "Microbacias ANA: 71 verde #3DD563; 77 rosa #E775CA; 82 verde acinzentado #7F9B8E; 83 violeta #DD70EE" },
     },
     {
       id: "drenagem-ana", name: "Drenagem ANA", description: "Rede ANA classificada por ordem da drenagem", kind: "drainage", defaultVisible: false,
