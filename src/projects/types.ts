@@ -81,7 +81,7 @@ export interface VectorPopupConfig {
     property: string;
     label?: string;
     suffix?: string;
-    numberFormat?: { locale: string; decimalPlaces: number };
+    numberFormat?: { locale: string; decimalPlaces: number; parseNumericString?: boolean };
   }[];
 }
 

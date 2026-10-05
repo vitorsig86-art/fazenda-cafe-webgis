@@ -26,7 +26,7 @@ export const fazendaCafeProject: ProjectConfig = {
     { id: "basemap", title: "Mapa base", layerIds: ["basemap"] },
     { id: "drone-rasters", title: "Rasters de drone", layerIds: ["ortomosaico", "mds", "mdt", "declividade", "orientacao-solar"] },
     { id: "drone-vectors", title: "Vetores de drone", layerIds: ["talhoes", "curvas", "drenagem"] },
-    { id: "macro", title: "Análise Macro", layerIds: ["dem-macro", "curvas-5m-macro", "drenagem-ana", "microbacias-ana", "pedologia-ibge", "limites-municipais"] },
+    { id: "macro", title: "Análise Macro", layerIds: ["dem-macro", "curvas-5m-macro", "drenagem-ana", "microbacias-ana", "pedologia-ibge", "limites-municipais", "limite-microbacia-ana"] },
     { id: "model", title: "Modelo 3D", layerIds: ["modelo-3d"] },
   ],
   layers: [
@@ -174,6 +174,21 @@ export const fazendaCafeProject: ProjectConfig = {
             { property: "SIGLA_UF", label: "UF" },
             { property: "CD_MUN", label: "Código IBGE" },
             { property: "AREA_KM2", label: "Área municipal", numberFormat: { locale: "pt-BR", decimalPlaces: 3 }, suffix: " km²" },
+          ],
+        },
+      },
+    },
+    {
+      id: "limite-microbacia-ana", name: "Limite da microbacia ANA", description: "Limite da microbacia ANA para contexto macro", kind: "vector", defaultVisible: false,
+      source: {
+        format: "geojson", url: `${baseUrl}/geojson/limite_microbacia_ana.geojson`, autoZoom: false,
+        style: { stroke: "#2E7D32", strokeWidth: 3, fill: "rgba(46, 125, 50, 0.04)", clampToGround: true, zIndex: 1 },
+        popup: {
+          title: "Microbacia ANA", hideEmptyFields: true, normalizeWhitespace: true,
+          fields: [
+            { property: "wts_cd_pfafstetterbasin", label: "Código Pfafstetter" },
+            { property: "wts_cd_pfafstetterbasincodeleve", label: "Nível" },
+            { property: "wts_gm_area", label: "Área", numberFormat: { locale: "pt-BR", decimalPlaces: 3, parseNumericString: true }, suffix: " km²" },
           ],
         },
       },

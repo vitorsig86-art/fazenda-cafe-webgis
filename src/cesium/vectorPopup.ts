@@ -37,9 +37,12 @@ export function readVectorPopup(entity: Entity | undefined) {
     title: config.titleProperty && properties[config.titleProperty] != null ? `${config.titlePrefix ?? ""}${properties[config.titleProperty]}` : config.title,
     fields: config.fields.flatMap((field) => {
       const rawValue = properties[field.property];
-      const value = config.normalizeWhitespace && typeof rawValue === "string"
+      const cleanedValue = config.normalizeWhitespace && typeof rawValue === "string"
         ? rawValue.replace(/\s+/g, " ").trim()
         : rawValue;
+      const value = field.numberFormat?.parseNumericString && typeof cleanedValue === "string" && cleanedValue.trim() !== ""
+        ? Number(cleanedValue)
+        : cleanedValue;
       if (config.hideEmptyFields && (value == null
         || (typeof value === "number" && !Number.isFinite(value))
         || (typeof value === "string" && (value.trim() === "" || /^(null|undefined|nan)$/i.test(value.trim()))))) return [];
