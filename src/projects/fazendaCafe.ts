@@ -107,8 +107,8 @@ export const fazendaCafeProject: ProjectConfig = {
       source: {
         format: "geojson", url: `${baseUrl}/geojson/microbacias-ana.geojson`, autoZoom: false, uniqueFeatureIds: true,
         style: {
-          stroke: "#47534D", strokeWidth: 1.5, fill: "rgba(127, 155, 142, 0.32)", clampToGround: true, zIndex: 5,
-          fillByProperty: { property: "STREAM_ID", opacity: 0.32, colors: [
+          stroke: "#47534D", strokeWidth: 1.5, fill: "rgba(127, 155, 142, 0.55)", clampToGround: true, zIndex: 5,
+          fillByProperty: { property: "STREAM_ID", opacity: 0.55, colors: [
             "#78A58C", "#C18D76", "#7A9EB8", "#BAA168", "#A58BB4", "#6EA9A5",
             "#BF869E", "#98A76E", "#8B91B5", "#C49D80", "#A6B6B2", "#A79A87",
           ] },
