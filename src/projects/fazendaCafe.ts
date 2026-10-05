@@ -76,6 +76,13 @@ export const fazendaCafeProject: ProjectConfig = {
       },
     },
     {
+      id: "curvas-5m-macro", name: "Curvas de nível 5 m (Macro)", description: "Curvas de nível de 5 metros (Macro)", kind: "contours", defaultVisible: false,
+      source: { format: "geojson", url: `${baseUrl}/geojson/curvas_5m_macro.geojson`, autoZoom: false,
+        style: { stroke: "#3A3A3A", strokeWidth: 1.5, clampToGround: true, zIndex: 1 },
+        popup: { title: "Curva de nível", fields: [{ property: "ELEVATION", label: "Cota" }] },
+      },
+    },
+    {
       id: "drenagem", name: "Linhas de drenagem", description: "Rede de drenagem", kind: "drainage", defaultVisible: false,
       source: { format: "geojson", url: `${baseUrl}/geojson/drenagem.geojson`, autoZoom: false,
         style: { stroke: "#168bff", strokeWidth: 2, clampToGround: true, zIndex: 1 },
