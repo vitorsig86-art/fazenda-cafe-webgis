@@ -26,7 +26,7 @@ export const fazendaCafeProject: ProjectConfig = {
     { id: "basemap", title: "Mapa base", layerIds: ["basemap"] },
     { id: "drone-rasters", title: "Rasters de drone", layerIds: ["ortomosaico", "mds", "mdt", "declividade", "orientacao-solar"] },
     { id: "drone-vectors", title: "Vetores de drone", layerIds: ["talhoes", "curvas", "drenagem"] },
-    { id: "macro", title: "Análise Macro", layerIds: ["dem-macro", "curvas-5m-macro", "drenagem-ana", "microbacias-ana", "pedologia-ibge", "limites-municipais", "limite-microbacia-ana"] },
+    { id: "macro", title: "Análise Macro", layerIds: ["dem-macro", "curvas-5m-macro", "simulacao-drenagem-anadem", "drenagem-ana", "microbacias-ana", "pedologia-ibge", "limites-municipais", "limite-microbacia-ana"] },
     { id: "model", title: "Modelo 3D", layerIds: ["modelo-3d"] },
   ],
   layers: [
@@ -87,6 +87,13 @@ export const fazendaCafeProject: ProjectConfig = {
       source: { format: "geojson", url: `${baseUrl}/geojson/curvas_5m_macro.geojson`, autoZoom: false,
         style: { stroke: "#3A3A3A", strokeWidth: 1.5, clampToGround: true, zIndex: 1 },
         popup: { title: "Curva de nível", fields: [{ property: "ELEVATION", label: "Cota" }] },
+      },
+    },
+    {
+      id: "simulacao-drenagem-anadem", name: "Simulação de Drenagem ANADEM", description: "Rede de drenagem simulada a partir da elevação ANADEM", kind: "drainage", defaultVisible: false,
+      source: {
+        format: "geojson", url: `${baseUrl}/geojson/simu_drenagem.geojson`, autoZoom: false,
+        style: { stroke: "#00D7E8", strokeWidth: 2.2, clampToGround: true, zIndex: 10 },
       },
     },
     {
