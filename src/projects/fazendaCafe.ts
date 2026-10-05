@@ -34,7 +34,7 @@ export const fazendaCafeProject: ProjectConfig = {
       id: "basemap", name: "Bing Aerial com rótulos", description: "Bing Maps via Cesium ion", kind: "basemap", defaultVisible: true,
       source: { format: "ion-world-imagery", fallback: { url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png", credit: '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a>', maximumLevel: 19 } },
     },
-    raster("dem-macro", "DEM Macro", "raster", "macro", [-67.5, -21.943045533, -45.0, 0.0], 4, 13),
+    raster("dem-macro", "Modelo de Elevação ANADEM", "raster", "macro", [-67.5, -21.943045533, -45.0, 0.0], 4, 13),
     raster("ortomosaico", "Ortomosaico", "orthomosaic", "orto", orthoBounds, 12, 21, true),
     {
       ...raster("mds", "Modelo Digital da Superfície", "dsm", "mds", terrainBounds, 11, 20),
@@ -76,7 +76,7 @@ export const fazendaCafeProject: ProjectConfig = {
       },
     },
     {
-      id: "curvas", name: "Curvas de nível", description: "Curvas de nível de 2 metros", kind: "contours", defaultVisible: false,
+      id: "curvas", name: "Curvas de Nível 2 m", description: "Curvas de nível de 2 metros", kind: "contours", defaultVisible: false,
       source: { format: "geojson", url: `${baseUrl}/geojson/curvas_2m.geojson`, autoZoom: false,
         style: { stroke: "#000000", strokeWidth: 1, clampToGround: true, zIndex: 1 },
         popup: { title: "Curva de nível", fields: [{ property: "ELEVATION", label: "Cota", suffix: " m" }] },
@@ -96,7 +96,7 @@ export const fazendaCafeProject: ProjectConfig = {
       },
     },
     {
-      id: "microbacias-ana", name: "Microbacias ANA", description: "Microbacias delimitadas pela rede ANA", kind: "vector", defaultVisible: false, opacityControl: true,
+      id: "microbacias-ana", name: "Microbacia de Captação Macro", description: "Microbacias delimitadas pela rede ANA", kind: "vector", defaultVisible: false, opacityControl: true,
       source: {
         format: "geojson", url: `${baseUrl}/geojson/microbacias-ana.geojson`, autoZoom: false, uniqueFeatureIds: true,
         style: {
@@ -161,7 +161,7 @@ export const fazendaCafeProject: ProjectConfig = {
       },
     },
     {
-      id: "limites-municipais", name: "Limites municipais", description: "Limites municipais para contexto macro", kind: "vector", defaultVisible: false,
+      id: "limites-municipais", name: "Limites Municipais", description: "Limites municipais para contexto macro", kind: "vector", defaultVisible: false,
       source: {
         format: "geojson", url: `${baseUrl}/geojson/limite_municipios.geojson`, autoZoom: false,
         style: { stroke: "#8B3A3A", strokeWidth: 3, fill: "rgba(139, 58, 58, 0.05)", clampToGround: true, zIndex: 1 },
@@ -177,7 +177,7 @@ export const fazendaCafeProject: ProjectConfig = {
       },
     },
     {
-      id: "limite-microbacia-ana", name: "Limite da microbacia ANA", description: "Limite da microbacia ANA para contexto macro", kind: "vector", defaultVisible: false,
+      id: "limite-microbacia-ana", name: "Limite da Microbacia ANA", description: "Limite da microbacia ANA para contexto macro", kind: "vector", defaultVisible: false,
       source: {
         format: "geojson", url: `${baseUrl}/geojson/limite_microbacia_ana.geojson`, autoZoom: false,
         style: { stroke: "#2E7D32", strokeWidth: 3, fill: "rgba(46, 125, 50, 0.04)", clampToGround: true, zIndex: 1 },
