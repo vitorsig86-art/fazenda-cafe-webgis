@@ -55,6 +55,17 @@
 .navigation-controls button:active:not(:disabled) { background: #536a7ceb; }
 .navigation-controls button:focus-visible { outline: 2px solid #fff; outline-offset: -4px; }
 
+.navigation-location { position: relative; }
+.navigation-controls .navigation-location[data-state="active"] { color: #9acaff; background: #284d70; }
+.navigation-controls .navigation-location[data-state="locating"] { color: #9acaff; }
+.navigation-controls .navigation-location[data-state="error"] { color: #ffd1a1; }
+.navigation-location-dot { position: absolute; right: 5px; bottom: 5px; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.navigation-location[data-state="locating"] .navigation-location-dot { animation: location-pulse 1s ease-in-out infinite alternate; }
+.navigation-location-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.map-alert.navigation-location-error { bottom: calc(150px + env(safe-area-inset-bottom)); }
+@keyframes location-pulse { from { opacity: 0.3; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .navigation-location[data-state="locating"] .navigation-location-dot { animation: none; } }
+
 @media (max-width: 760px) {
   .navigation-controls, .app-shell:has(.raster-legend-stack) .navigation-controls { top: calc(var(--header-height) + 8px); right: max(8px, env(safe-area-inset-right)); width: 44px; gap: 4px; }
   .navigation-controls .navigation-compass { width: 44px; height: 44px; }
